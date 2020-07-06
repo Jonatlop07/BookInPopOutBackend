@@ -22,8 +22,8 @@ public class InfoCola extends HttpServlet {
         super();
     }
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        Connection conexion = null;
         
         try {
             PrintWriter respuesta = response.getWriter();
@@ -33,12 +33,12 @@ public class InfoCola extends HttpServlet {
             if (ColaPrioridad.cola == null || ColaPrioridad.cola.isEmpty()) {
                 respuesta.print(articulo + "]");
             } else {
+                int size = ColaPrioridad.cola.size();
                 User[] users = ColaPrioridad.cola.heap;
 
-                Connection conexion = miPool.getConnection();
+                conexion = miPool.getConnection();
 
-                for (int i = 0; i < ColaPrioridad.cola.size() && users[i] != null; i++) {
-
+                for (int i = 0; i < size; i++) {
                     String miquery = "SELECT nombre, apellido, id_documento FROM usuario WHERE id_usuario = '"
                             + users[i].getUid() + "'";
                     Statement sentencia = conexion.createStatement();
@@ -51,9 +51,13 @@ public class InfoCola extends HttpServlet {
                         articulo += ",";
                     }
                 }
-
+                
                 respuesta.print(articulo.substring(0, articulo.length() - 1) + "]");
+                
+                conexion.close();
             }
+            
+            respuesta.close();
             
         } catch (Exception e) {
             e.printStackTrace();
